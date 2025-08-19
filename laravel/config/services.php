@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'python' => [
+    'base_url' => env('PYTHON_BASE_URL', 'http://python-service:8000'),
+],
+
+
 ];

@@ -1,0 +1,35 @@
+# OS & editor
+.DS_Store
+.idea/
+.vscode/
+
+# Node/Frontend (later)
+node_modules/
+dist/
+
+# PHP / Composer
+vendor/
+laravel/storage/framework/cache/*
+laravel/storage/framework/sessions/*
+laravel/storage/framework/views/*
+laravel/storage/logs/*
+laravel/bootstrap/cache/*
+
+# Python
+__pycache__/
+*.pyc
+.python-version
+python_service/__pycache__/
+python_service/logs/*
+
+# Env files
+.env
+**/.env
+
+# Docker
+*.pid
+*.sock
+
+# Logs
+*.log
+logs/*
