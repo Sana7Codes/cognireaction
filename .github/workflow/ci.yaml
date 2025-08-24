@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  php:
+    name: Laravel tests & docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_sqlite
+          coverage: none
+
+      - name: Cache composer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.composer/cache/files
+            laravel/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer deps
+        working-directory: laravel
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare app env
+        working-directory: laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          # CI docs & examples use this base URL
+          echo "APP_URL=http://localhost:8081" >> .env
+
+      - name: .env.testing (sqlite in-memory)
+        working-directory: laravel
+        run: |
+          cat > .env.testing <<'ENV'
+          APP_ENV=testing
+          APP_KEY=${{ secrets.APP_KEY_TESTING }}
+          APP_DEBUG=true
+          CACHE_STORE=array
+          QUEUE_CONNECTION=sync
+          SESSION_DRIVER=array
+          DB_CONNECTION=sqlite
+          DB_DATABASE=:memory:
+          ENV
+
+      - name: Run tests (Pest / PHPUnit)
+        working-directory: laravel
+        run: php artisan test
+
+      - name: Generate API docs (Scribe)
+        working-directory: laravel
+        run: php artisan scribe:generate
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs
+          path: |
+            laravel/public/docs
+            laravel/public/vendor/scribe
+            laravel/storage/app/private/scribe/collection.json
+            laravel/storage/app/private/scribe/openapi.yaml
+
+  # Optional: Python service checks (enable when you add tests)
+  python:
+    name: Python service checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        working-directory: python_service
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint (ruff placeholder)
+        working-directory: python_service
+        run: |
+          echo "Add ruff/flake8 when ready"
