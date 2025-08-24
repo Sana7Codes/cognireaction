@@ -5,13 +5,26 @@ on:
     branches: [ main ]
   pull_request:
 
+# Prevent overlapping runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   php:
-    name: Laravel tests & docs
+    name: Laravel tests & Scribe docs
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: laravel
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -20,30 +33,28 @@ jobs:
           extensions: mbstring, intl, pdo_sqlite
           coverage: none
 
-      - name: Cache composer
+      - name: Cache Composer
         uses: actions/cache@v4
         with:
           path: |
             ~/.composer/cache/files
             laravel/vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('laravel/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
 
       - name: Install Composer deps
-        working-directory: laravel
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: composer install --no-interaction --prefer-dist --no-progress --ansi
 
       - name: Prepare app env
-        working-directory: laravel
         run: |
           cp .env.example .env
           php artisan key:generate
-          # CI docs & examples use this base URL
+          # Ensure URL in generated examples & Scribe output
           echo "APP_URL=http://localhost:8081" >> .env
 
-      - name: .env.testing (sqlite in-memory)
-        working-directory: laravel
+      # ---------- TESTS (SQLite in-memory) ----------
+      - name: Create .env.testing (SQLite :memory:)
         run: |
           cat > .env.testing <<'ENV'
           APP_ENV=testing
@@ -56,13 +67,23 @@ jobs:
           DB_DATABASE=:memory:
           ENV
 
-      - name: Run tests (Pest / PHPUnit)
-        working-directory: laravel
-        run: php artisan test
+      - name: Run test suite (Pest/PHPUnit)
+        run: php artisan test --ansi
+
+      # ---------- SCRIBE DOCS (file-backed SQLite) ----------
+      - name: Prepare SQLite file & migrate for Scribe
+        run: |
+          mkdir -p database
+          touch database/database.ci.sqlite
+          # Switch this run to file-backed sqlite and migrate
+          {
+            echo "DB_CONNECTION=sqlite"
+            echo "DB_DATABASE=$(pwd)/database/database.ci.sqlite"
+          } >> .env
+          php artisan migrate --force
 
       - name: Generate API docs (Scribe)
-        working-directory: laravel
-        run: php artisan scribe:generate
+        run: php artisan scribe:generate --ansi
 
       - name: Upload docs artifact
         uses: actions/upload-artifact@v4
@@ -73,22 +94,38 @@ jobs:
             laravel/public/vendor/scribe
             laravel/storage/app/private/scribe/collection.json
             laravel/storage/app/private/scribe/openapi.yaml
+          retention-days: 7
 
-  
+      # Optional: capture logs on failure to aid debugging
+      - name: Upload Laravel logs (on fail)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laravel-logs
+          path: laravel/storage/logs
+          retention-days: 3
+
   python:
     name: Python service checks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python_service
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install deps
-        working-directory: python_service
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Lint (ruff placeholder)
-        working-directory: python_service
-        run: |
-          echo "Add ruff/flake8 when ready"
+
+      # Swap in your linter/tests when ready. Kept non-failing for now.
+      - name: Lint placeholder
+        run: echo "Add ruff/flake8/pytest here when ready"
+
