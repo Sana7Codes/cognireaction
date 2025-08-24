@@ -29,4 +29,14 @@ class StoreReactionTrialRequest extends FormRequest
             'meta'=>['nullable','array'],
         ];
     }
+
+    public function bodyParameters(): array
+{
+    return [
+        'stimulus_ms' => ['description' => 'When stimulus was shown (ms).', 'example' => 1000],
+        'response_ms' => ['description' => 'When user responded (ms).', 'example' => 1140],
+        'correct'     => ['description' => 'Whether the response was correct.', 'example' => true],
+        'meta'        => ['description' => 'Optional trial metadata.', 'example' => ['block' => 1]],
+    ];
+}
 }

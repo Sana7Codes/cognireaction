@@ -29,4 +29,17 @@ class StoreMemoryTrialRequest extends FormRequest
             'meta'=>['nullable','array'],
         ];
     }
+
+    public function bodyParameters(): array
+    {
+        return [
+            'trial_number'  => ['description' => 'Trial index.', 'example' => 1],
+            'items_count'   => ['description' => 'Items shown.', 'example' => 7],
+            'correct_count' => ['description' => 'Correct recalls.', 'example' => 6],
+            'accuracy'      => ['description' => 'Accuracy ratio (0–1).', 'example' => 0.857],
+            'meta'          => ['description' => 'Optional trial metadata.', 'example' => ['set' => 'A']],
+        ];
+    }
+
+    
 }

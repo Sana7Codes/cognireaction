@@ -27,4 +27,16 @@ class StartSessionRequest extends FormRequest
             'meta'=>['nullable','array'],
         ];
     }
+
+    public function bodyParameters(): array
+{
+    return [
+        'user_id' => ['description' => 'ID of the user owning the session.', 'example' => 1],
+        'label'   => ['description' => 'Label for this session.', 'example' => 'baseline'],
+        'meta'    => ['description' => 'Optional metadata.', 'example' => ['device' => 'mac']],
+    ];
 }
+}
+
+
+

@@ -1,0 +1,341 @@
+openapi: 3.0.3
+info:
+  title: 'Laravel API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8081'
+tags:
+  -
+    name: Endpoints
+    description: ''
+components:
+  securitySchemes:
+    default:
+      type: http
+      scheme: bearer
+      description: 'You can retrieve your token by visiting your dashboard and clicking <b>Generate API token</b>.'
+security:
+  -
+    default: []
+paths:
+  /api/health:
+    get:
+      summary: ''
+      operationId: getApiHealth
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  ok: true
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+      tags:
+        - Endpoints
+      security: []
+  '/api/sessions/{session_id}':
+    get:
+      summary: ''
+      operationId: getApiSessionsSession_id
+      description: ''
+      parameters: []
+      responses:
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'No query results for model [App\Models\ExperimentSession] 17'
+                properties:
+                  message:
+                    type: string
+                    example: 'No query results for model [App\Models\ExperimentSession] 17'
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: session_id
+        description: 'The ID of the session.'
+        example: 17
+        required: true
+        schema:
+          type: integer
+  '/api/sessions/{session_id}/results':
+    get:
+      summary: ''
+      operationId: getApiSessionsSession_idResults
+      description: ''
+      parameters: []
+      responses:
+        404:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'No query results for model [App\Models\ExperimentSession] 17'
+                properties:
+                  message:
+                    type: string
+                    example: 'No query results for model [App\Models\ExperimentSession] 17'
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: session_id
+        description: 'The ID of the session.'
+        example: 17
+        required: true
+        schema:
+          type: integer
+  /api/sessions:
+    post:
+      summary: ''
+      operationId: postApiSessions
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: 'ID of the user owning the session. The <code>id</code> of an existing record in the users table.'
+                  example: 1
+                  nullable: true
+                label:
+                  type: string
+                  description: 'Label for this session. Must not be greater than 120 characters.'
+                  example: baseline
+                  nullable: true
+                meta:
+                  type: object
+                  description: 'Optional metadata.'
+                  example:
+                    device: mac
+                  nullable: true
+                  properties: {  }
+      security: []
+  '/api/sessions/{session_id}/reactions':
+    post:
+      summary: ''
+      operationId: postApiSessionsSession_idReactions
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stimulus_ms:
+                  type: integer
+                  description: 'When stimulus was shown (ms). Must be at least 0.'
+                  example: 1000
+                  nullable: false
+                response_ms:
+                  type: integer
+                  description: 'When user responded (ms).'
+                  example: 1140
+                  nullable: false
+                latency_ms:
+                  type: integer
+                  description: 'Must be at least 0.'
+                  example: 73
+                  nullable: true
+                correct:
+                  type: boolean
+                  description: 'Whether the response was correct.'
+                  example: false
+                  nullable: false
+                meta:
+                  type: object
+                  description: 'Optional trial metadata.'
+                  example:
+                    block: 1
+                  nullable: true
+                  properties: {  }
+              required:
+                - stimulus_ms
+                - response_ms
+                - correct
+      security: []
+    parameters:
+      -
+        in: path
+        name: session_id
+        description: 'The ID of the session.'
+        example: 17
+        required: true
+        schema:
+          type: integer
+  '/api/sessions/{session_id}/memories':
+    post:
+      summary: ''
+      operationId: postApiSessionsSession_idMemories
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trial_number:
+                  type: integer
+                  description: 'Trial index. Must be at least 1.'
+                  example: 1
+                  nullable: false
+                items_count:
+                  type: integer
+                  description: 'Items shown. Must be at least 1.'
+                  example: 7
+                  nullable: false
+                correct_count:
+                  type: integer
+                  description: 'Correct recalls. Must be at least 0.'
+                  example: 6
+                  nullable: false
+                accuracy:
+                  type: number
+                  description: 'Accuracy ratio (0–1). Must be between 0 and 1.'
+                  example: 0.857
+                  nullable: false
+                meta:
+                  type: object
+                  description: 'Optional trial metadata.'
+                  example:
+                    set: A
+                  nullable: true
+                  properties: {  }
+              required:
+                - trial_number
+                - items_count
+                - correct_count
+                - accuracy
+      security: []
+    parameters:
+      -
+        in: path
+        name: session_id
+        description: 'The ID of the session.'
+        example: 17
+        required: true
+        schema:
+          type: integer
+  '/api/sessions/{session_id}/summary':
+    get:
+      summary: ''
+      operationId: getApiSessionsSession_idSummary
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: session_id
+        description: 'The ID of the session.'
+        example: 17
+        required: true
+        schema:
+          type: integer
+  '/api/sessions/{session_id}/export.csv':
+    get:
+      summary: ''
+      operationId: getApiSessionsSession_idExportCsv
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Unauthenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: session_id
+        description: 'The ID of the session.'
+        example: 17
+        required: true
+        schema:
+          type: integer
+  /api/analyze:
+    post:
+      summary: ''
+      operationId: postApiAnalyze
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: 'Must not be greater than 10000 characters.'
+                  example: vmqeopfuudtdsufvyvddq
+                  nullable: false
+              required:
+                - text
+      security: []
