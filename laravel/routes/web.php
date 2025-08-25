@@ -1,4 +1,6 @@
 
 <?php
 use Illuminate\Support\Facades\Route;
-Route::get("/", fn() => view("welcome"));  // uses resources/views/welcome.blade.php
+use App\Http\Controllers\Web\HomeController;
+
+Route::get('/', HomeController::class)->name('home');
